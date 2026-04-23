@@ -1,145 +1,378 @@
 # AWS-CLOUD-SECURITY-LAB-OPERATIONS
 
-This SOP outlines the process for implementing a secure AWS environment using EC2, Systems Manager, Patch Manager, and Config to achieve:
+This  is the process for implementing a secure AWS environment using EC2, Systems Manager, Patch Manager, and Config to achieve:
+
+----------------------------------------------------------------------------------------------------------
+
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/cb24f2db-e575-4586-8dbe-03b8bda71485" />
+
+-----------------------------------------------------------------------
+
+## Architecture Summary
+
+EC2 Instance (Amazon Linux)
+
+VPC with Subnets
+
+IAM Roles
+
+AWS Systems Manager (SSM)
+
+Patch Manager
+
+AWS Config
+
+S3 Bucket (for logs)
+
+------------------------------------------------------------------
+
+## You will learn how to:
 
 Secure instance management (without SSH)
+
 Continuous compliance monitoring
+
 Automated remediation of security violations
+
 Centralized patch management
-🎯 Objectives
+
+------------------------------------------------------------------------
+## Objectives
 
 By completing this lab, you will:
 
 Manage EC2 instances securely without SSH access
+
 Detect insecure configurations using AWS Config
+
 Automatically remediate security violations
+
 Implement automated patching strategies
+
 Maintain continuous compliance across resources
-🔐 Security Principles Applied
+
+------------------------------------------------------------------
+
+## Security Principles Applied
+
 Confidentiality: Encrypted storage and restricted access
+
 Integrity: Configuration monitoring and audit trails
+
 Availability: Controlled access and monitoring
+
 IAAA: IAM roles, MFA, least privilege
+
 Cloud Security Operations: Hardening, patching, monitoring
-🚀 Implementation Steps
-🔹 Step 1: Create and Configure EC2 Instance
+
+-----------------------------------------------------------------------------
+
+## Implementation Steps
+
+### Step 1: Create and Configure EC2 Instance
+
 Launch an EC2 instance:
+
 Name: Your preferred name
+
 AMI: Amazon Linux
+
 Instance Type: t3.micro
-Configure Networking:
+
+#### Configure Networking:
+
 Create a VPC
+
 Create 3 subnets
+
 Enable IPv4 and IPv6 CIDR blocks
+
 Enable auto-assign public IP
-Configure Security Group:
+
+#### Configure Security Group:
+
 Allow all traffic (0.0.0.0/0) (for lab purposes only)
-Do NOT allow SSH (port 22)
-Create a key pair
+
+Do NOT allow SSH (port 22) Remove SSH (port 22) → we will use SSM instead
+
+#### Create a key pair
+
 Launch the instance
-Post-launch:
+
+#### Post-launch:
+
 Reboot instance
-Attach IAM Role:
+
+#### Attach IAM Role:
+
 Go to Actions → Security → Modify IAM Role
+
 Create and attach a new IAM Role
-🔹 Step 2: Enable Systems Manager Access (No SSH)
+
+
+### Step 2: Enable Systems Manager Access (SSM) (No SSH)
+
 Navigate to EC2 → Network Interfaces
-Select the interface → Manage IP addresses
+
+Select the interface
+
+Click Actions → Manage IP Address
+
 Enable Auto-assign Public IP
+
 Restart the instance:
-Stop → Start
-Go to AWS Systems Manager → Fleet Manager
+
+Stop → Start instance
+
+
+### Go to AWS Systems Manager → Fleet Manager
+
+Click Account Management → Configure
+
 Configure Default Host Management:
+
 Enable Default Host Management Configuration
+
 Create role:
 AWSSystemManagerDefaultEC2InstanceManagementRole
+
 Confirm instance appears under Managed Nodes
-🔹 Step 3: Connect to Instance via Systems Manager
+
+
+### Step 3: Connect to Instance via Systems Manager (SSM)
+
 Go to Fleet Manager → Managed Nodes
+
 Select instance → Node Actions → Connect
+
 Launch terminal session
 
-Run test commands:
+Run Commands (Inside Terminal)
 
 whoami
+
 pwd
+
 ls
+
 cd ..
+
+pwd
+
+ls
+
+Create Files
+
 sudo touch onyii
+
 sudo nano security.txt
-Validate using:
+
+Add text:
+
+I love to code
+
+View Files via GUI (Graphical User Interface)
+
+Go to:
+
 Node Actions → Tools → File System Viewer
-🔹 Step 4: Monitor and Manage Instance
 
-Using Fleet Manager, explore:
+You can:
 
-📊 Performance Metrics:
+View files
+
+Check permissions
+
+Create directories
+
+
+
+### Step 4: Monitor and Manage Instance
+
+Inside Fleet Manager, explore:
+
+#### Performance Metrics:
+
 CPU Utilization
+
 Disk I/O
+
 Network Traffic
+
 Memory Usage
-⚙️ Resource Management:
+
+#### Resource Management:
+
 Processes (CPU & Memory)
+
 Users and Groups
-File System
-▶️ Run Commands:
+
+#### File System
+
+Run Commands:
+
 Execute remote commands without SSH
-🔹 Step 5: Patch Management (Manual)
+
+
+### Step 5: Patch Management (Manual)
+
 Go to Systems Manager → Patch Manager
+
 Run Scan:
+
 Patch Operation: Scan
-Target: Specific instance
-Review compliance:
+
+Target: Manual Instance Selection
+
+Choose your instance
+
+#### Review compliance:
+
 Patch Manager → Compliance
+
 Create Patch Baseline:
+
 Define approved patches
+
 Set as default if needed
+
 Apply patches:
+
 Operation: Scan and Install
+
 Reboot option: Disabled
-🔹 Step 6: Create Patch Policy (Automation)
+
+
+### Step 6: Create Patch Policy (Automation)
+
 Navigate to Patch Manager → Patch Policies
+
 Configure:
+
 Patch Operation: Scan
+
 Schedule: Default
+
 Baseline: Default
-Create an S3 bucket for logs
-Attach S3 bucket to policy
-Create patch policy
-🔹 Step 7: Create Maintenance Window
+
+#### Create an S3 bucket for logs
+
+Open new tab → Search S3
+
+Create bucket (for logs)
+
+Link Bucket
+
+Return to Patch Policy
+
+Select bucket
+
+Click Create
+
+
+
+### Step 7: Create Maintenance Window
+
 Go to Systems Manager → Maintenance Windows
+
+Click Create
+
 Configure:
+
 Name
+
 Schedule
-Duration
+
+Duration (e.g., weekly patching)
+
+Save
+
 Assign tasks (patching, commands)
-🔹 Step 8: Enable AWS Config (Compliance Monitoring)
 
-AWS Config tracks resource changes and enforces rules.
 
-Setup:
-Navigate to AWS Config → Set Up
+
+### Step 8: Enable AWS Config (Compliance Monitoring)
+
+What AWS Config Does
+
+Tracks configuration changes
+
+Detects misconfigurations
+
+Enforces compliance rules
+
+#### Setup:
+
+Search AWS Config
+
+Click Get Started
+
 Configure:
+
 Resource tracking
+
 S3 bucket for logs
-Add Managed Rule:
+
+#### Add Managed Rule:
+
 Rule: restricted-ssh
-Scope: EC2 Security Groups
-🔹 Step 9: Test Compliance Detection
-Modify EC2 Security Group:
-Add SSH rule (0.0.0.0/0)
-Refresh AWS Config:
-Resource becomes Non-compliant
+
+Search: restricted-ssh
+
+Rename: restricted-ssh-2
+
+Apply to:
+EC2 Security Group
+
+
+
+### Step 9: Test Compliance Detection/violation
+
+#### 1. Break the Rule
+
+Go to EC2 → Security Group
+
+Add:
+SSH (port 22)
+Source: 0.0.0.0/0
+
+#### 2. Check AWS Config
+
+Refresh → shows:
+
+❌ Non-compliant
+
 Fix manually:
+
 Remove SSH rule
+
 Confirm compliance restored
-🔹 Step 10: Enable Automatic Remediation
-1. Create IAM Role
+
+
+### Step 10: Enable Automatic Remediation
+
+Go to AWS Config Rule
+
+Click Manage Remediation
+
+Select:
+
+Automatic remediation
+
+#####  Create IAM Role
+
+Go to IAM → Roles → Create Role
+
 Service: Systems Manager
-Role Name: ConfigRemediationRole
-Attach Policy:
+
+Attach:
 AmazonSSMAutomationRole
-2. Create Custom Policy
+
+Role Name: ConfigRemediationRole
+
+
+#### 2. Create Custom Policy
+
 {
   "Version":"2012-10-17",
   "Statement": [
@@ -154,40 +387,76 @@ AmazonSSMAutomationRole
   ]
 }
 
+
 Attach this policy to the role.
 
-3. Configure Remediation in AWS Config
+-------------------------------------------------------------------------------------
+
+## Configure Remediation in AWS Config
+
 Go to AWS Config → Rules → Manage Remediation
+
 Select:
+
 Automatic remediation
+
 Retry settings
+
 Provide:
+
 IAM Role ARN
+
 Security Group ID
+
 Save configuration
-4. Validate Automation
+
+--------------------------------------------------------------------------
+
+## Validate Automation
+
 Reintroduce violation:
+
 Add SSH rule (0.0.0.0/0)
+
 AWS Config detects violation
+
 Automatic remediation removes rule
-✅ Expected Outcomes
+
+#### ✅ Expected Outcomes
+
 EC2 managed without SSH
+
 Centralized control via Systems Manager
+
 Automated patching and maintenance
+
 Real-time compliance monitoring
+
 Automatic remediation of security risks
-📌 Key Takeaways
+
+---------------------------------------------------------------------
+
+## Key Takeaways
+
 Systems Manager replaces SSH for secure access
+
 Patch Manager ensures systems are up-to-date
+
 AWS Config enforces compliance continuously
+
 Automation reduces human error in security
 
-
-
-
-
-
-
+-----------------------------------------------------------------------
 
 ## Notion Link
 https://swamp-diadem-74c.notion.site/AWS-CLOUD-SECURITY-LAB-OPERATIONS-33b5e80cc2358068aed4e471bdd436ce?source=copy_link
+
+--------------------------------------------------------------------------
+
+## Author
+
+Monica Agwu
+
+*Cloud Engineering & DevOps
+
+https://www.linkedin.com/in/agwumonica/
